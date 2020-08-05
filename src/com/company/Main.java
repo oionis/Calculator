@@ -5,22 +5,21 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final String[] ARAB_NUMERAL = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    private static final String[] LATIN_NUMERAL = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
-    private static final String[] SIGN = {"+", "-", "*", "/"};
-
     public static void main(String[] args) {
 
         String string;
         String[] subString;
-        Scanner p = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         while (true) {
-            string = p.nextLine();
+            string = scanner.nextLine();
             subString = string.trim().split(" ");
 
             Value value = check(subString);
-            Integer ans = operation(value.getA(), value.getB(), subString[1]);
-            print(value.isLatin(), ans);
+            if (value == null){
+                System.exit(0);
+            }
+            Integer answer = operation(value.getA(), value.getB(), subString[1]);
+            print(value.isLatin(), answer);
 
 
         }
@@ -31,84 +30,85 @@ public class Main {
         try {
             if (arrayStr.length != 3) {
                 throw new MyException("Expression is not written correctly");
-            } else if (!Arrays.asList(SIGN).contains(arrayStr[1])) {
+            } else if (!Arrays.asList(Constants.SIGN).contains(arrayStr[1])) {
                 throw new MyException("Error sign");
-            } else if (Arrays.asList(ARAB_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
+            } else if (Arrays.asList(Constants.ARAB_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
                 return new Value(Integer.parseInt(arrayStr[0]), Integer.parseInt(arrayStr[2]), false);
-            } else if (Arrays.asList(LATIN_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
+            } else if (Arrays.asList(Constants.LATIN_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
                 return new Value((LatinNumerals.valueOf(arrayStr[0]).ordinal() + 1), (LatinNumerals.valueOf(arrayStr[2]).ordinal() + 1), true);
             }
             throw new MyException("Incorrect value");
         } catch (MyException ex) {
-            System.exit(0);
             System.out.println(ex.getMessage());
         }
         return null;
     }
 
-    private static Integer operation(int a, int b, String sign) {
+    private static Integer operation(int firstVariable, int secondVariable, String sign) {
         switch (sign) {
             case "+":
-                return (a + b);
+                return (firstVariable + secondVariable);
             case "-":
-                return (a - b);
+                return (firstVariable - secondVariable);
             case "*":
-                return (a * b);
+                return (firstVariable * secondVariable);
             case "/":
-                return (a / b);
+                return (firstVariable / secondVariable);
         }
         return null;
     }
 
-    private static void print(boolean isLatinN, int ans) {
+    private static void print(boolean isLatinN, int answer) {
         if (isLatinN) {
-
-
-            int b, c;
-            StringBuilder str = new StringBuilder();
-            if (ans > 0 && ans <= 10) {
-                str.append(LATIN_NUMERAL[ans - 1]);
-            } else if (ans > 10 && ans < 40) {
-                b = ans / 10;
-                c = ans % 10;
-                str.append("X".repeat(b));
-                if (c != 0) {
-                    str.append(LATIN_NUMERAL[c - 1]);
-                }
-            } else if (ans >= 40 && ans < 50) {
-                ans -= 40;
-                str.append("XL");
-                if (ans != 0) {
-                    str.append(LATIN_NUMERAL[ans - 1]);
-                }
-            } else if (ans >= 50 && ans < 90) {
-                ans -= 50;
-                str.append("L");
-                b = ans / 10;
-                c = ans % 10;
-                str.append("X".repeat(b));
-                if (c != 0) {
-                    str.append(LATIN_NUMERAL[c - 1]);
-                }
-            } else if (ans >= 90 && ans < 100) {
-                ans -= 90;
-                str.append("XC");
-                if (ans != 0) {
-                    str.append(LATIN_NUMERAL[ans - 1]);
-                }
-            } else if (ans == 100) {
-                str.append("C");
-            } else {
-                System.out.println("Number must be integer");
-            }
-
-            System.out.println(str);
-
-
+            System.out.println(arabNumToLatinNum(answer));
         } else {
-            System.out.println(ans);
+            System.out.println(answer);
         }
 
 
+    }
+
+    private static StringBuilder arabNumToLatinNum(int arabNum) {
+        
+        int decimalNum, tmpNum;
+        StringBuilder str = new StringBuilder();
+        
+        if (arabNum > 0 && arabNum <= 10) {
+            str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
+        } else if (arabNum > 10 && arabNum < 40) {
+            decimalNum = arabNum / 10;
+            tmpNum = arabNum % 10;
+            str.append(Constants.X.repeat(decimalNum));
+            if (tmpNum != 0) {
+                str.append(Constants.LATIN_NUMERAL[tmpNum - 1]);
+            }
+        } else if (arabNum >= 40 && arabNum < 50) {
+            arabNum -= 40;
+            str.append(Constants.X).append(Constants.L);
+            if (arabNum != 0) {
+                str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
+            }
+        } else if (arabNum >= 50 && arabNum < 90) {
+            arabNum -= 50;
+            str.append(Constants.L);
+            decimalNum = arabNum / 10;
+            tmpNum = arabNum % 10;
+            str.append(Constants.X.repeat(decimalNum));
+            if (tmpNum != 0) {
+                str.append(Constants.LATIN_NUMERAL[tmpNum - 1]);
+            }
+        } else if (arabNum >= 90 && arabNum < 100) {
+            arabNum -= 90;
+            str.append(Constants.X).append(Constants.C);
+            if (arabNum != 0) {
+                str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
+            }
+        } else if (arabNum == 100) {
+            str.append(Constants.C);
+        } else {
+            System.out.println("Number must be integer");
+        }
+
+        return str;
     }
 }
