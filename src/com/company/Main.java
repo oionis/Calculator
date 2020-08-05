@@ -15,10 +15,10 @@ public class Main {
             subString = string.trim().split(" ");
 
             Value value = check(subString);
-            if (value == null){
+            if (value == null) {
                 System.exit(0);
             }
-            Integer answer = operation(value.getA(), value.getB(), subString[1]);
+            Integer answer = operation(value.getFirstValue(), value.getSecondValue(), subString[1]);
             print(value.isLatin(), answer);
 
 
@@ -69,10 +69,10 @@ public class Main {
     }
 
     private static StringBuilder arabNumToLatinNum(int arabNum) {
-        
+
         int decimalNum, tmpNum;
         StringBuilder str = new StringBuilder();
-        
+
         if (arabNum > 0 && arabNum <= 10) {
             str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
         } else if (arabNum > 10 && arabNum < 40) {
