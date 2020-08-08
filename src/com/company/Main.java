@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -10,6 +11,7 @@ public class Main {
         String string;
         String[] subString;
         Scanner scanner = new Scanner(System.in);
+
         while (true) {
             string = scanner.nextLine();
             subString = string.trim().split(" ");
@@ -19,10 +21,12 @@ public class Main {
                 System.exit(0);
             }
             Integer answer = operation(value.getFirstValue(), value.getSecondValue(), subString[1]);
-            print(value.isLatin(), answer);
+            print(value.isRoman(), answer);
 
 
         }
+
+
     }
 
     private static Value check(String[] arrayStr) {
@@ -34,11 +38,11 @@ public class Main {
                 throw new MyException("Error sign");
             } else if (Arrays.asList(Constants.ARAB_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
                 return new Value(Integer.parseInt(arrayStr[0]), Integer.parseInt(arrayStr[2]), false);
-            } else if (Arrays.asList(Constants.LATIN_NUMERAL).containsAll(Arrays.asList(arrayStr[0], arrayStr[2]))) {
-                return new Value((LatinNumerals.valueOf(arrayStr[0]).ordinal() + 1), (LatinNumerals.valueOf(arrayStr[2]).ordinal() + 1), true);
+            } else {
+                return new Value(romanToArabic(arrayStr[0]), romanToArabic(arrayStr[2]), true);
             }
-            throw new MyException("Incorrect value");
-        } catch (MyException ex) {
+
+        } catch (MyException | IllegalArgumentException ex) {
             System.out.println(ex.getMessage());
         }
         return null;
@@ -58,57 +62,73 @@ public class Main {
         return null;
     }
 
-    private static void print(boolean isLatinN, int answer) {
-        if (isLatinN) {
-            System.out.println(arabNumToLatinNum(answer));
+    private static void print(boolean isRoman, int answer) {
+        if (isRoman) {
+            System.out.println(arabicToRoman(answer));
         } else {
             System.out.println(answer);
         }
-
-
     }
 
-    private static StringBuilder arabNumToLatinNum(int arabNum) {
-
-        int decimalNum, tmpNum;
-        StringBuilder str = new StringBuilder();
-
-        if (arabNum > 0 && arabNum <= 10) {
-            str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
-        } else if (arabNum > 10 && arabNum < 40) {
-            decimalNum = arabNum / 10;
-            tmpNum = arabNum % 10;
-            str.append(Constants.X.repeat(decimalNum));
-            if (tmpNum != 0) {
-                str.append(Constants.LATIN_NUMERAL[tmpNum - 1]);
-            }
-        } else if (arabNum >= 40 && arabNum < 50) {
-            arabNum -= 40;
-            str.append(Constants.X).append(Constants.L);
-            if (arabNum != 0) {
-                str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
-            }
-        } else if (arabNum >= 50 && arabNum < 90) {
-            arabNum -= 50;
-            str.append(Constants.L);
-            decimalNum = arabNum / 10;
-            tmpNum = arabNum % 10;
-            str.append(Constants.X.repeat(decimalNum));
-            if (tmpNum != 0) {
-                str.append(Constants.LATIN_NUMERAL[tmpNum - 1]);
-            }
-        } else if (arabNum >= 90 && arabNum < 100) {
-            arabNum -= 90;
-            str.append(Constants.X).append(Constants.C);
-            if (arabNum != 0) {
-                str.append(Constants.LATIN_NUMERAL[arabNum - 1]);
-            }
-        } else if (arabNum == 100) {
-            str.append(Constants.C);
-        } else {
-            System.out.println("Number must be integer");
+    private static String arabicToRoman(int number) {
+        if ((number <= 0) || (number > 4000)) {
+            throw new IllegalArgumentException(number + " is not in range (0,4000]");
         }
 
-        return str;
+        List<RomanNumeral> romanNumerals = RomanNumeral.getReverseSortedValues();
+
+        int i = 0;
+        StringBuilder sb = new StringBuilder();
+
+        while ((number > 0) && (i < romanNumerals.size())) {
+            RomanNumeral currentSymbol = romanNumerals.get(i);
+            if (currentSymbol.getValue() <= number) {
+                sb.append(currentSymbol.name());
+                number -= currentSymbol.getValue();
+            } else {
+                i++;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static int romanToArabic(String romanStr) {
+
+        String[] arrRomanString = romanStr.split("");
+        List<RomanNumeral> romanNumerals = RomanNumeral.getReverseSortedValues();
+        int result = 0;
+        int i = 0;
+        int j = 0;
+
+
+        while (i < arrRomanString.length && j < romanNumerals.size()) {
+
+            RomanNumeral currentSymbol = romanNumerals.get(j);
+            if (currentSymbol.toString().length() == 1) {
+                if (currentSymbol.toString().equals(arrRomanString[i])) {
+                    result += currentSymbol.getValue();
+                    i++;
+                } else {
+                    j++;
+                }
+
+            } else if (currentSymbol.toString().length() == 2 && ((arrRomanString.length - i) > 1)) {
+                if (currentSymbol.toString().equals(arrRomanString[i] + arrRomanString[i + 1])) {
+                    result += currentSymbol.getValue();
+                    i += 2;
+                } else {
+                    j++;
+                }
+            } else
+                j++;
+        }
+
+        if (arrRomanString.length != i){
+            throw new IllegalArgumentException(romanStr + " is incorrect roman numeral");
+        }
+
+        return result;
+
     }
 }

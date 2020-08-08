@@ -4,7 +4,7 @@ public class Value {
 
     private int firstValue;
     private int secondValue;
-    private boolean isLatin;
+    private boolean isRoman;
 
     public int getFirstValue() {
         return firstValue;
@@ -14,14 +14,14 @@ public class Value {
         return secondValue;
     }
 
-    public boolean isLatin() {
-        return isLatin;
+    public boolean isRoman() {
+        return isRoman;
     }
 
-    public Value(int firstValue, int secondValue, boolean isLatin) {
+    public Value(int firstValue, int secondValue, boolean isRoman) {
         this.firstValue = firstValue;
         this.secondValue = secondValue;
-        this.isLatin = isLatin;
+        this.isRoman = isRoman;
     }
 
     public Value() {
